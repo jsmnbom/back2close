@@ -1,0 +1,22 @@
+{
+  "name": "Back to close",
+  "version": "",
+  "author": "",
+  "manifest_version": 2,
+  "description": "",
+  "icons": {
+    "32": "icon.svg",
+    "64": "icon.svg",
+    "128": "icon.svg"
+  },
+  "permissions": [
+    "tabs",
+    "<all_urls>",
+    "notifications"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  }
+}
