@@ -12,11 +12,21 @@
   "permissions": [
     "tabs",
     "<all_urls>",
-    "notifications"
+    "notifications",
+    "storage"
   ],
   "background": {
     "scripts": [
       "background.js"
     ]
+  },
+  "options_ui": {
+    "browser_style": true,
+    "page": "options.html"
+  },
+  "applications": {
+    "gecko": {
+      "id": "back2close@bomjacob.github.io"
+    }
   }
 }
