@@ -1,7 +1,7 @@
 {
   "name": "back2close",
-  "version": "0.2.0",
-  "description": "Use the back button to close newly opened tabs with a parent.",
+  "version": "0.3.0",
+  "description": "Use the back button to close newly opened tabs.",
   "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -1,5 +1,7 @@
 'use strict';
 
+let debug = false;
+
 let all = true;
 
 browser.storage.sync.get("all").then((item) => {
@@ -18,38 +20,52 @@ browser.runtime.onInstalled.addListener((details) => {
     });
 });
 
-let toExecute = new Set();
+let source;
+fetch(browser.runtime.getURL("script.js")).then((response) => {
+    return response.text();
+}).then((text) => {
+    source = text.replace('__DEBUG__', debug);
+});
+
+let toPushState = new Set();
 
 function execute(tab) {
+    debug && console.log("Attempting execution");
     if (!tab.url.startsWith('about:')) {
         browser.tabs.executeScript(tab.id, {
-            file: 'script.js'
+            code: source.replace('__PUSH_STATE__', toPushState.has(tab.id)),
+            runAt: "document_start"
         }).then((result) => {
-            toExecute.delete(tab.id);
-            console.log('result', result);
+            toPushState.has(tab.id) && toPushState.delete(tab.id);
+            debug && console.log('result', result);
         }, (error) => {
-            console.log('error', error, tab);
+            debug && console.log('error', error, tab);
         });
     }
 }
 
 browser.tabs.onCreated.addListener((tab) => {
-    console.log(all);
+    debug && console.log("created", tab, all, tab.openerTabId || all);
     if (tab.openerTabId || all) {
-        toExecute.add(tab.id);
+        toPushState.add(tab.id);
         execute(tab);
     }
 });
 
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (toExecute.has(tab.id)) {
+    debug && console.log("updated", tab, changeInfo);
+    if (changeInfo.hasOwnProperty("url") || changeInfo.status === "completed") {
         execute(tab);
     }
 });
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.closeMe) {
-        browser.tabs.remove(sender.tab.id);
+        browser.tabs.remove(sender.tab.id).then(() => {
+            debug && console.log("removed", sender.tab);
+        }, (error) => {
+            debug && console.log("error removing tab", error, sender.tab);
+        })
     } else if (message.options) {
         browser.storage.sync.set({
             all: message.options.all
