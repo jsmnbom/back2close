@@ -21,11 +21,13 @@ browser.runtime.onInstalled.addListener((details) => {
     });
 });
 
+let CLOSE_TAB = 'Close tab';
+
 let source;
 fetch(browser.runtime.getURL("script.js")).then((response) => {
     return response.text();
 }).then((text) => {
-    source = text.replace('__DEBUG__', debug);
+    source = text.replace('__DEBUG__', debug).replace('__CLOSE_TITLE__', CLOSE_TAB);
 });
 
 let tabs = {};
@@ -59,6 +61,9 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.hasOwnProperty("url") || changeInfo.status === "completed") {
         execute(tab);
     }
+    if (tabs[tab.id] && tab.title !== CLOSE_TAB) {
+        tabs[tab.id].title = tab.title;
+    }
 });
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -71,6 +76,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         })
     } else if (message.pushed) {
         tabs[sender.tab.id].push = false;
+        sendResponse({title: tabs[sender.tab.id].title});
     } else if (message.options) {
         browser.storage.sync.set({
             all: message.options.all
