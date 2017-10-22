@@ -15,6 +15,7 @@ browser.runtime.onInstalled.addListener((details) => {
         iconUrl: "icon.svg",
         message: "Back to Close is now installed. Close newly opened tabs with a parent using the back button."
     });
+    //TODO: Check that not already present
     browser.storage.sync.set({
         all: true
     });
@@ -27,16 +28,15 @@ fetch(browser.runtime.getURL("script.js")).then((response) => {
     source = text.replace('__DEBUG__', debug);
 });
 
-let toPushState = new Set();
+let tabs = {};
 
 function execute(tab) {
-    debug && console.log("Attempting execution");
+    debug && console.log("Attempting execution", tabs[tab.id]);
     if (!tab.url.startsWith('about:')) {
         browser.tabs.executeScript(tab.id, {
-            code: source.replace('__PUSH_STATE__', toPushState.has(tab.id)),
+            code: source.replace('__PUSH_STATE__', tabs[tab.id].push),
             runAt: "document_start"
         }).then((result) => {
-            toPushState.has(tab.id) && toPushState.delete(tab.id);
             debug && console.log('result', result);
         }, (error) => {
             debug && console.log('error', error, tab);
@@ -47,7 +47,9 @@ function execute(tab) {
 browser.tabs.onCreated.addListener((tab) => {
     debug && console.log("created", tab, all, tab.openerTabId || all);
     if (tab.openerTabId || all) {
-        toPushState.add(tab.id);
+        tabs[tab.id] = {
+            push: true
+        };
         execute(tab);
     }
 });
@@ -60,12 +62,15 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    debug && console.log("got messsage", message);
     if (message.closeMe) {
         browser.tabs.remove(sender.tab.id).then(() => {
             debug && console.log("removed", sender.tab);
         }, (error) => {
             debug && console.log("error removing tab", error, sender.tab);
         })
+    } else if (message.pushed) {
+        tabs[sender.tab.id].push = false;
     } else if (message.options) {
         browser.storage.sync.set({
             all: message.options.all
