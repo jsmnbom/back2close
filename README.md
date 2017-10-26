@@ -2,7 +2,7 @@
     <img src="/src/icon.svg" alt="Icon" title="Back to Close" align="right" height="60" />
 </a>
 
-# Back to Close
+# Back to Close WE
 
 Use the back button to close newly opened tabs.
 

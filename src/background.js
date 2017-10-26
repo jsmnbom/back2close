@@ -11,9 +11,9 @@ browser.storage.sync.get("all").then((item) => {
 browser.runtime.onInstalled.addListener((details) => {
     browser.notifications.create({
         type: "basic",
-        title: "Back to Close Installed",
+        title: "Back to Close WE installed",
         iconUrl: "icon.svg",
-        message: "Back to Close is now installed. Close newly opened tabs with a parent using the back button."
+        message: "Back to Close WE is now installed. Close newly opened tabs with a parent using the back button."
     });
     //TODO: Check that not already present
     browser.storage.sync.set({
