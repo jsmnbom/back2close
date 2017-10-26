@@ -5,6 +5,7 @@
 # Back to Close WE
 
 Use the back button to close newly opened tabs.
+Port of other popular addons of same name to the web extensions platform.
 
 Install and rate on [addons.mozilla.com](https://addons.mozilla.org/en-US/firefox/addon/back-to-close-we/).
 
