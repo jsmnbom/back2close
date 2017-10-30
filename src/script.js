@@ -16,13 +16,16 @@
     window.addEventListener('popstate', (event) => {
         debug && console.log('popped', event);
         if (event.state && event.state.BACK_CLOSE) {
+            history.forward();
             browser.runtime.sendMessage({
                 closeMe: true
             });
         }
     });
 
-    if (__PUSH_STATE__) {
+    debug && console.log("history length", history.length);
+
+    if (__PUSH_STATE__ && history.length === __REQUIRED_LENGTH__) {
         debug && console.log("Pushing state!");
         let stateObj = {BACK_CLOSE: true};
         document.title = title;

@@ -36,7 +36,7 @@ function execute(tab) {
     debug && console.log("Attempting execution", tabs[tab.id]);
     if (!tab.url.startsWith('about:')) {
         browser.tabs.executeScript(tab.id, {
-            code: source.replace('__PUSH_STATE__', tabs[tab.id].push),
+            code: source.replace('__PUSH_STATE__', tabs[tab.id].push).replace('__REQUIRED_LENGTH__', tabs[tab.id].newtab ? 2 : 1),
             runAt: "document_start"
         }).then((result) => {
             debug && console.log('result', result);
@@ -50,7 +50,8 @@ browser.tabs.onCreated.addListener((tab) => {
     debug && console.log("created", tab, all, tab.openerTabId || all);
     if (tab.openerTabId || all) {
         tabs[tab.id] = {
-            push: true
+            push: true,
+            newtab: tab.url === "about:newtab"
         };
         execute(tab);
     }
