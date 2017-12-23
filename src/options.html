@@ -7,9 +7,14 @@
 </head>
 <body>
     <div class="browser-style">
-        <input class="browser-style" type="checkbox" id="all"/>
+        <input class="browser-style option" type="checkbox" id="all"/>
         <label class="browser-style" for="all">Load on all tabs</label>
         <p>If not checked, Back to Close will only load on tabs with a parent (opened via "open in new tab").</p>
+        <input class="browser-style option" type="checkbox" id="closetabtitle"/>
+        <label class="browser-style" for="closetabtitle">Show "Close tab" in history</label>
+        <p>When checked, Back to Close WE will breifly change the title to "Close tab" when injecting a history state.
+            This shows when right clicking on the back button. This may lead to a tab getting stuck with this title, if
+            this is unacceptable, uncheck this option.</p>
     </div>
     <script src="options.js"></script>
 </body>

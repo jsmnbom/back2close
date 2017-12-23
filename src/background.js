@@ -2,10 +2,37 @@
 
 let debug = false;
 
-let all = true;
+let opts = {
+    all: undefined,
+    closetabtitle: undefined
+};
 
-browser.storage.sync.get("all").then((item) => {
-    all = item.all;
+browser.storage.sync.get(opts).then((item) => {
+    Object.assign(opts, item);
+    debug && console.log("opts", opts);
+    load();
+
+    let defs = {
+        all: true,
+        closetabtitle: true
+    };
+    for (let def of Object.keys(defs)) {
+        if (opts[def] === undefined || opts[def] === null) {
+            browser.storage.sync.set({
+                [def]: defs[def]
+            }).then(() => {
+                load();
+            });
+        }
+    }
+});
+
+browser.storage.onChanged.addListener((changes) => {
+    for (let change of Object.keys(changes)) {
+        opts[change] = changes[change].newValue;
+    }
+    debug && console.log("opts", opts);
+    load();
 });
 
 browser.runtime.onInstalled.addListener((details) => {
@@ -13,24 +40,24 @@ browser.runtime.onInstalled.addListener((details) => {
         type: "basic",
         title: "Back to Close WE installed",
         iconUrl: "icon.svg",
-        message: "Back to Close WE is now installed. Close newly opened tabs with a parent using the back button."
+        message: "Back to Close WE is now installed. Close newly opened tabs using the back button."
     });
-    //TODO: Check that not already present
-    browser.storage.sync.set({
-        all: true
-    });
+
 });
 
 let CLOSE_TAB = 'Close tab';
-
 let source;
-fetch(browser.runtime.getURL("script.js")).then((response) => {
-    return response.text();
-}).then((text) => {
-    source = text.replace('__DEBUG__', debug).replace('__CLOSE_TITLE__', CLOSE_TAB);
-});
-
 let tabs = {};
+
+function load() {
+    fetch(browser.runtime.getURL("script.js")).then((response) => {
+        return response.text();
+    }).then((text) => {
+        source = text.replace('__DEBUG__', debug).replace('__CLOSE_TITLE__', opts.closetabtitle ? ('"' + CLOSE_TAB + '"') : 'false');
+    });
+}
+
+load();
 
 function execute(tab) {
     debug && console.log("Attempting execution", tabs[tab.id]);
@@ -47,8 +74,8 @@ function execute(tab) {
 }
 
 browser.tabs.onCreated.addListener((tab) => {
-    debug && console.log("created", tab, all, tab.openerTabId || all);
-    if (tab.openerTabId || all) {
+    debug && console.log("created", tab, opts, tab.openerTabId || opts.all);
+    if (tab.openerTabId || opts.all) {
         tabs[tab.id] = {
             push: true,
             newtab: tab.url === "about:newtab"
@@ -75,13 +102,8 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }, (error) => {
             debug && console.log("error removing tab", error, sender.tab);
         })
-    } else if (message.pushed) {
-        tabs[sender.tab.id].push = false;
+    } else if (message.pushed || message === false /* not undefined */) {
+        tabs[sender.tab.id].push = message.pushed;
         sendResponse({title: tabs[sender.tab.id].title});
-    } else if (message.options) {
-        browser.storage.sync.set({
-            all: message.options.all
-        });
-        all = message.options.all;
     }
 });

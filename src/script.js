@@ -1,7 +1,7 @@
 (function () {
     'use strict';
     let debug = __DEBUG__;
-    let title = "__CLOSE_TITLE__";
+    let title = __CLOSE_TITLE__;
 
     debug && console.log("Current state", history.state);
     debug && console.log("Current length", history.length);
@@ -29,21 +29,19 @@
         debug && console.log("Pushing state!");
         let stateObj = {BACK_CLOSE: true};
         window.setTimeout(() => {
-            document.title = title;
+            if (title) document.title = title;
             history.replaceState(stateObj, null, window.location.href + "#");
             debug && console.log("before push length", history.length);
             let before = history.length;
             window.setTimeout(() => {
                 history.pushState(null, null, window.location.href.slice(-1) === "#" ? window.location.href.slice(0, -1) : window.location.href);
                 debug && console.log("after push length", history.length);
-                if (before + 1 === history.length) {
-                    browser.runtime.sendMessage({
-                        pushed: true
-                    }).then((response) => {
-                        debug && console.log("response", response);
-                        document.title = response.title;
-                    });
-                }
+                browser.runtime.sendMessage({
+                    pushed: before + 1 === history.length
+                }).then((response) => {
+                    debug && console.log("response", response);
+                    if (title) document.title = response.title;
+                });
             });
         });
     }
