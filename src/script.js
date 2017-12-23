@@ -28,7 +28,6 @@
     if (__PUSH_STATE__ && history.length === __REQUIRED_LENGTH__) {
         debug && console.log("Pushing state!");
         let stateObj = {BACK_CLOSE: true};
-        document.title = title;
         window.setTimeout(() => {
             document.title = title;
             history.replaceState(stateObj, null, window.location.href + "#");
