@@ -6,6 +6,12 @@
     debug && console.log("Current state", history.state);
     debug && console.log("Current length", history.length);
 
+    browser.runtime.onMessage.addListener((response) => {
+        debug && console.log("response", response);
+        debug && console.log("title", title, document.title, '=>', response.title);
+        if (title) document.title = response.title;
+    });
+
     if (window.__BACK_INIT) {
         debug && console.log("Cancelling due to __BACK_INIT");
         return;
@@ -29,8 +35,8 @@
         debug && console.log("Pushing state!");
         let stateObj = {BACK_CLOSE: true};
         window.setTimeout(() => {
+            history.replaceState(stateObj, "", window.location.href);
             if (title) document.title = title;
-            history.replaceState(stateObj, null, window.location.href + "#");
             debug && console.log("before push length", history.length);
             let before = history.length;
             window.setTimeout(() => {
@@ -38,9 +44,6 @@
                 debug && console.log("after push length", history.length);
                 browser.runtime.sendMessage({
                     pushed: before + 1 === history.length
-                }).then((response) => {
-                    debug && console.log("response", response);
-                    if (title) document.title = response.title;
                 });
             });
         });

@@ -35,7 +35,9 @@ browser.storage.onChanged.addListener((changes) => {
     load();
 });
 
-let CLOSE_TAB = 'Close tab';
+// ZERO WIDTH SPACE to make title unique but still display pretty
+// Didn't need it after all, but could come in handy
+let CLOSE_TAB = 'Close\u200b \u200btab';
 let source;
 let tabs = {};
 
@@ -80,11 +82,12 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         execute(tab);
     }
     if (tabs[tab.id] && tab.title !== CLOSE_TAB) {
+        debug && console.log('Title', tabs[tab.id].title, '=>', tab.title);
         tabs[tab.id].title = tab.title;
     }
 });
 
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((message, sender) => {
     debug && console.log("got messsage", message);
     if (message.closeMe) {
         browser.tabs.remove(sender.tab.id).then(() => {
@@ -93,7 +96,10 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
             debug && console.log("error removing tab", error, sender.tab);
         })
     } else if (message.pushed || message === false /* not undefined */) {
+        debug && console.log('pushed');
         tabs[sender.tab.id].push = message.pushed;
-        sendResponse({title: tabs[sender.tab.id].title});
+        debug && console.log('Sending title back to tab');
+        browser.tabs.sendMessage(sender.tab.id, {title: tabs[sender.tab.id].title});
+        // Possibly delete history entry?
     }
 });
