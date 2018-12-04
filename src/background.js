@@ -35,16 +35,6 @@ browser.storage.onChanged.addListener((changes) => {
     load();
 });
 
-browser.runtime.onInstalled.addListener((details) => {
-    browser.notifications.create({
-        type: "basic",
-        title: "Back to Close WE installed",
-        iconUrl: "icon.svg",
-        message: "Back to Close WE is now installed. Close newly opened tabs using the back button."
-    });
-
-});
-
 let CLOSE_TAB = 'Close tab';
 let source;
 let tabs = {};
