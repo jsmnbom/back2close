@@ -12,7 +12,6 @@
   "permissions": [
     "tabs",
     "<all_urls>",
-    "notifications",
     "storage"
   ],
   "background": {
