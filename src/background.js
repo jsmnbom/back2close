@@ -57,7 +57,7 @@ function execute(tab) {
     debug && console.log("Attempting execution", tabs[tab.id]);
     if (!tab.url.startsWith('about:')) {
         browser.tabs.executeScript(tab.id, {
-            code: source.replace('__PUSH_STATE__', tabs[tab.id].push).replace('__REQUIRED_LENGTH__', tabs[tab.id].newtab ? (opts.tampermonkeyfix + 2) : (opts.tampermonkeyfix + 1)),
+            code: source.replace('__PUSH_STATE__', tabs[tab.id].push).replace('__REQUIRED_LENGTH__', tabs[tab.id].newtab ? 2 : (opts.tampermonkeyfix + 1)),
             runAt: "document_start"
         }).then((result) => {
             debug && console.log('result', result);
