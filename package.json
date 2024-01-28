@@ -1,6 +1,6 @@
 {
   "name": "back2close",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Use the back button to close newly opened tabs.",
   "main": "",
   "scripts": {

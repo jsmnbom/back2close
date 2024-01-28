@@ -4,7 +4,8 @@ let debug = false;
 
 let opts = {
     all: undefined,
-    closetabtitle: undefined
+    closetabtitle: undefined,
+    tampermonkeyfix: undefined
 };
 
 browser.storage.sync.get(opts).then((item) => {
@@ -14,7 +15,8 @@ browser.storage.sync.get(opts).then((item) => {
 
     let defs = {
         all: true,
-        closetabtitle: true
+        closetabtitle: true,
+        tampermonkeyfix: false
     };
     for (let def of Object.keys(defs)) {
         if (opts[def] === undefined || opts[def] === null) {
@@ -55,7 +57,7 @@ function execute(tab) {
     debug && console.log("Attempting execution", tabs[tab.id]);
     if (!tab.url.startsWith('about:')) {
         browser.tabs.executeScript(tab.id, {
-            code: source.replace('__PUSH_STATE__', tabs[tab.id].push).replace('__REQUIRED_LENGTH__', tabs[tab.id].newtab ? 2 : 1),
+            code: source.replace('__PUSH_STATE__', tabs[tab.id].push).replace('__REQUIRED_LENGTH__', tabs[tab.id].newtab ? (opts.tampermonkeyfix + 2) : (opts.tampermonkeyfix + 1)),
             runAt: "document_start"
         }).then((result) => {
             debug && console.log('result', result);
